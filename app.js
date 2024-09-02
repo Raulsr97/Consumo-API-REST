@@ -1,6 +1,7 @@
-const API_URL_RANDOM = 'https://api.thecatapi.com/v1/images/search?limit=3&api_key=live_CP2m8iwvGrJjYfMwL2PwH4S436oCpghRZVMdhvNEnLsNAatJTh0w5unCUlv0qUNC'
-const API_URL_FAVORITES = 'https://api.thecatapi.com/v1/favourites?api_key=live_CP2m8iwvGrJjYfMwL2PwH4S436oCpghRZVMdhvNEnLsNAatJTh0w5unCUlv0qUNC'
-const API_URL_FAVORITES_DELETE = (id) => `https://api.thecatapi.com/v1/favourites/${id}?api_key=live_CP2m8iwvGrJjYfMwL2PwH4S436oCpghRZVMdhvNEnLsNAatJTh0w5unCUlv0qUNC`  
+const API_URL_RANDOM = 'https://api.thecatapi.com/v1/images/search?limit=3'
+const API_URL_FAVORITES = 'https://api.thecatapi.com/v1/favourites'
+const API_URL_FAVORITES_DELETE = (id) => `https://api.thecatapi.com/v1/favourites/${id}`
+const API_URL_UPLOAD ='https://api.thecatapi.com/v1/images/upload' 
 
 
 
@@ -39,7 +40,12 @@ async function mostrarGatito() {
 
 async function cargarFavoritos() {
 
-    const res = await fetch(API_URL_FAVORITES)
+    const res = await fetch(API_URL_FAVORITES, {
+        method: 'GET',
+        headers: {
+            'X-API-KEY': 'live_CP2m8iwvGrJjYfMwL2PwH4S436oCpghRZVMdhvNEnLsNAatJTh0w5unCUlv0qUNC'
+        }
+    })
     const data = await res.json()
     console.log(data);
 
@@ -80,7 +86,8 @@ async function guardarFavoritos(id) {
     const res = await fetch(API_URL_FAVORITES, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-API-KEY': 'live_CP2m8iwvGrJjYfMwL2PwH4S436oCpghRZVMdhvNEnLsNAatJTh0w5unCUlv0qUNC'
         },
         body: JSON.stringify({
             image_id: id
@@ -100,7 +107,10 @@ async function guardarFavoritos(id) {
 }
 async function eliminarFavoritos(id) {
     const res = await fetch(API_URL_FAVORITES_DELETE(id), {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+            'X-API-KEY': 'live_CP2m8iwvGrJjYfMwL2PwH4S436oCpghRZVMdhvNEnLsNAatJTh0w5unCUlv0qUNC'
+        }
     })
 
     const data = await res.json()
@@ -114,6 +124,34 @@ async function eliminarFavoritos(id) {
 
 }
 
+async function subirGatito() {
+    const form = document.getElementById('subiendoFormulario')
+
+    const formData = new FormData(form)
+
+    console.log(formData.get('file'));
+
+    const res = await fetch(API_URL_UPLOAD, {
+        method: 'POST',
+        headers: {
+            'X-API-KEY': 'live_CP2m8iwvGrJjYfMwL2PwH4S436oCpghRZVMdhvNEnLsNAatJTh0w5unCUlv0qUNC'
+        },
+        body: formData
+    } )
+
+    const data = await res.json()
+
+    if (res.status !== 201) {
+        spanError.innerHTML = 'Hubo un error: '+ res.status + data.message 
+    } else {
+        console.log('Gatito guardado');
+        console.log({ data });
+        console.log(data.url);
+        guardarFavoritos(data.id)
+    }
+    
+}
+ 
 mostrarGatito()
 cargarFavoritos()
 
